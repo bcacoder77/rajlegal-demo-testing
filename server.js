@@ -7,6 +7,14 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+app.use(cors({
+    origin: "*", // Sabhi websites se allow karo
+    methods: ["GET", "POST"],
+    credentials: true
+}));
+
+app.use(express.json());
+
 // ✅ DUMMY DATA - Real jaisa dikhe par fake
 const dummyLawyers = [
     {
@@ -107,4 +115,5 @@ app.listen(PORT, () => {
     console.log(`🚀 Demo Backend running on http://localhost:${PORT}`);
     console.log(`📊 Demo Lawyers: ${dummyLawyers.length}`);
     console.log(`🔗 Health Check: http://localhost:${PORT}/`);
+
 });
