@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RajLegal - DEMO SITE</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+        body { background: #f3f4f6; color: #111827; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; text-align: center; }
+        .demo-notice { background: #f59e0b; color: white; padding: 10px; border-radius: 8px; margin: 10px 0; text-align: center; }
+        .lawyer-card { background: white; padding: 1.5rem; border-radius: 12px; margin: 1rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-left: 4px solid #2563eb; }
+        .btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #1d4ed8; }
+        .success { background: #10b981; color: white; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚖️ RajLegal DEMO</h1>
+            <p>Testing Deployment - All Data is Fake</p>
+        </div>
+        
+        <div class="demo-notice">
+            ⚠️ THIS IS A DEMO SITE - FOR TESTING ONLY
+        </div>
+
+        <div id="successMessage" class="success">
+            ✅ Demo Booking Created Successfully!
+        </div>
+
+        <div id="lawyersList">
+            <p>Loading demo lawyers...</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:4000";
+        
+        async function loadLawyers() {
+            try {
+                const response = await fetch(API_BASE_URL + "/api/lawyers");
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById("lawyersList").innerHTML = data.lawyers.map(lawyer => `
+                        <div class="lawyer-card">
+                            <h3>${lawyer.name}</h3>
+                            <p>⭐ Rating: ${lawyer.rating}/5</p>
+                            <p>💼 Experience: ${lawyer.experience} years</p>
+                            <p>💰 Fees: ₹${lawyer.fees}</p>
+                            <p>📍 ${lawyer.district}</p>
+                            <p>⚖️ ${lawyer.specializations.join(", ")}</p>
+                            <button class="btn" onclick="createDemoBooking('${lawyer._id}', '${lawyer.name}', ${lawyer.fees})">
+                                📅 Book Demo Consultation
+                            </button>
+                        </div>
+                    `).join("");
+                }
+            } catch (error) {
+                document.getElementById("lawyersList").innerHTML = "<p>❌ Error loading lawyers. Check if backend is running.</p>";
+            }
+        }
+
+        async function createDemoBooking(lawyerId, lawyerName, lawyerFees) {
+            const bookingData = {
+                lawyerId: lawyerId,
+                lawyerName: lawyerName,
+                lawyerFees: lawyerFees,
+                consultationType: "Video Call",
+                date: new Date().toISOString().split("T")[0],
+                timeSlot: "10:00 AM",
+                message: "This is a demo booking from test site",
+                clientId: "demo-user-1",
+                clientName: "Demo User",
+                clientEmail: "demo@test.com", 
+                clientPhone: "9876543210"
+            };
+
+            try {
+                const response = await fetch(API_BASE_URL + "/api/bookings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    const successMsg = document.getElementById("successMessage");
+                    successMsg.style.display = "block";
+                    successMsg.innerHTML = `✅ Demo Booking Created! ID: ${result.booking.bookingId}`;
+                    
+                    setTimeout(() => {
+                        successMsg.style.display = "none";
+                    }, 5000);
+                    
+                    console.log("✅ Demo booking result:", result);
+                }
+            } catch (error) {
+                console.error("❌ Demo booking failed:", error);
+                alert("Booking failed. Check console for details.");
+            }
+        }
+
+        loadLawyers();
+    </script>
+</body>
+</html>
